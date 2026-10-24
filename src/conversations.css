@@ -1,0 +1,21 @@
+.conversations { padding:24px; margin-block:20px; }
+.conversations > p, .conversations details p { margin-block:12px; }
+.conversations fieldset { display:grid; gap:12px; padding:16px; margin-block:16px; border:1px solid #d8dfd5; border-radius:12px; }
+.conversations label:not(.toggle-row) { display:grid; gap:6px; }
+.conversations input:not([type=checkbox]), .conversations select, .conversations textarea { padding:10px; border:1px solid #d8dfd5; border-radius:8px; width:100%; box-sizing:border-box; }
+.conversation-list { display:grid; gap:16px; margin-block:20px; }
+.conversation-list > article, .conversation-editor { padding:20px; border:1px solid #d8dfd5; border-radius:12px; min-width:0; }
+.conversation-list p { margin-block:10px; }
+.conversation-list button { display:block; margin-block:12px; }
+.conversations h3, .conversations p, .conversations small { overflow-wrap:anywhere; }
+.conversations summary { cursor:pointer; margin-block:10px; }
+.conversation-editor blockquote { margin:12px 0; padding:16px; border-left:3px solid #9bac90; background:#f3f5ef; white-space:pre-wrap; overflow-wrap:anywhere; }
+@media(max-width:700px){.conversations {padding:16px;}}
+
+.thread-context { margin-block:20px; padding:20px; border:1px solid #d8dfd5; border-radius:12px; }
+.thread-context .thread-timeline > details { padding:14px; margin-block:14px; background:#f3f5ef; border-radius:8px; }
+.thread-context pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; line-height:1.65; margin-block:14px; }
+
+.reply-writing { margin-block:20px; padding:20px; border:1px solid #d8dfd5; border-radius:12px; }
+.reply-writing pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; line-height:1.6; margin-block:14px; }
+.reply-writing .reply-run, .reply-writing .reply-transfer {padding:16px; margin-block:16px; background:#f3f5ef; border-radius:10px;}

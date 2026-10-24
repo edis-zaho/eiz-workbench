@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly EiZ relay backup
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=60
+Unit=eiz-relay-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,75 @@
+{
+  "name": "eiz-workbench",
+  "version": "0.19.0-alpha.1",
+  "private": true,
+  "description": "EiZ Workbench – lokale Arbeitsumgebung",
+  "workbenchChannel": "public",
+  "author": "EiZ Systems",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "build": "node scripts/build.mjs",
+    "start": "electron .",
+    "package": "npm run verify && npm run licenses && electron-builder --win --publish never",
+    "test:desktop": "node scripts/test-desktop.cjs",
+    "verify": "node scripts/verify.mjs",
+    "licenses": "node scripts/licenses.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "autoprefixer": "^10.4.21",
+    "electron": "^42.5.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.25.0",
+    "tailwindcss": "^4.1.14",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3",
+    "@tailwindcss/vite": "^4.1.14",
+    "@vitejs/plugin-react": "^5.0.4"
+  },
+  "build": {
+    "appId": "com.eiz.workbench.public",
+    "productName": "EiZ Workbench",
+    "directories": {
+      "output": "release-public"
+    },
+    "files": [
+      "dist/**/*",
+      "backend/**/*",
+      "electron/**/*",
+      "assets/**/*",
+      "package.json",
+      "!node_modules/**/*",
+      "!electron/**/*.d.cts",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "third-party-licenses/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "electronDist": "node_modules/electron/dist"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  }
+}

@@ -1,0 +1,17 @@
+.relay-connection { margin-bottom: 20px; padding: 24px; }
+.relay-connection fieldset { border: 0; padding: 0; display: grid; gap: 12px; max-width: 650px; }
+.relay-connection label { display: grid; gap: 5px; }
+.relay-connection input, .relay-connection textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #dce2df; border-radius: 8px; background: #fff; }
+.relay-connection dl { display: grid; grid-template-columns: minmax(130px, 1fr) minmax(0, 2fr); gap: 8px 16px; }
+.relay-connection dd { margin: 0; overflow-wrap: anywhere; }
+.relay-connection .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.relay-connection > button { margin-top: 12px; }
+
+.relay-connection p { margin: 10px 0; overflow-wrap: anywhere; }
+.relay-connection dl { margin: 16px 0; }
+
+.relay-sync { border-top: 1px solid #dce2df; margin-top: 20px; padding-top: 20px; }
+.relay-binding { padding: 12px 0; }
+
+.tracking-settings { border-top: 1px solid #dce2df; margin-top: 20px; padding-top: 20px; }
+.tracking-settings textarea { min-height: 80px; resize: vertical; }

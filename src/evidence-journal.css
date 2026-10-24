@@ -1,0 +1,12 @@
+.evidence-journal { margin-top: 24px; }
+.evidence-journal .journal-list { display: grid; gap: 10px; margin: 16px 0; }
+.evidence-journal .journal-entry { padding: 12px; border: 1px solid var(--border, #334155); border-radius: 8px; }
+.evidence-journal summary { cursor: pointer; line-height: 1.6; }
+.evidence-journal dd { overflow-wrap: anywhere; }
+.interpretations { border-top:1px solid #dbe2d3; padding:16px 0; }
+.interpretations fieldset { border:0; padding:16px 0; display:grid; gap:12px; }
+.interpretations label { display:grid; gap:6px; }
+.interpretations input:not([type="checkbox"]), .interpretations select, .interpretations textarea { padding:9px; border:1px solid #dbe2d3; border-radius:6px; font:inherit; width:100%; box-sizing:border-box; }
+.interpretations label:has(input[type="checkbox"]) { display:flex; align-items:center; }
+.interpretations blockquote { margin:12px 0; border-left:3px solid #dbe2d3; padding:8px 16px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.interpretation-history article { padding:12px 0; border-bottom:1px solid #dbe2d3; overflow-wrap:anywhere; }

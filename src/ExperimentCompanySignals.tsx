@@ -1,0 +1,6 @@
+import {companySignalFields} from '../core/experiment-company-signal-fields';
+import type {experimentResults} from '../core/experiment-results';
+export function ExperimentCompanySignals({report}:{report:ReturnType<typeof experimentResults>}){
+ const comparison=report.companySignalComparison;
+ return <section className="experiment-company-signals"><h4>Signale im gemeinsamen Unternehmenszeitraum</h4><p>Dieselben Unternehmensfenster wie Antworten und Termine. Weitere Personen und Follow-ups beginnen die Frist nicht neu.</p><div className="lead-table"><table><caption>Unternehmenssignale · {comparison.windowDays} Tage je Unternehmen</caption><thead><tr><th scope="col">Kennzahl</th>{report.arms.map(a=><th scope="col" key={a.hypothesisId}>{a.name}<small>{a.personaName} · {a.angle}</small></th>)}</tr></thead><tbody>{companySignalFields.map(([key,label])=><tr key={key}><th scope="row">{label}</th>{comparison.arms.map(a=><td key={a.hypothesisId}>{a[key]}</td>)}</tr>)}</tbody></table></div><p>Technische Abrufe, keine bestätigten Leser. Pixel- und Klickunternehmen können sich überschneiden. Der separate Nachrichtenvergleich bleibt erhalten.</p><details><summary>Unternehmenssignale und Messlücken verstehen</summary><ul>{comparison.methodology.map(m=><li key={m}>{m}</li>)}</ul></details></section>;
+}

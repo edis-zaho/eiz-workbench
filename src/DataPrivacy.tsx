@@ -1,0 +1,12 @@
+import {useState,useEffect,useRef} from 'react';
+export function DataPrivacy({clientId,leadId,onChange}:{clientId:string;leadId:string;onChange:()=>Promise<void>}){
+ const [preview,setPreview]=useState<any>(),[scope,setScope]=useState<'contact'|'customer'>('contact'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[result,setResult]=useState<any>();
+ const epoch=useRef(0);useEffect(()=>{epoch.current++;setPreview(undefined);setResult(undefined);setScope('contact');return()=>{epoch.current++;};},[clientId,leadId]);
+ async function action(remove=false){const e=epoch.current;setBusy(true);setError('');try{const r=await window.workbench.privacyCommand(remove?'delete':'preview',{clientId,leadId,scope,hash:preview?.hash});if(e!==epoch.current)return;if(remove){if(r.cancelled)return;setResult(r);setPreview(undefined);await onChange();}else setPreview(r);}catch(x){if(e===epoch.current)setError((x as Error).message);}finally{if(e===epoch.current)setBusy(false);}}
+ return <details className="data-privacy"><summary>Kontaktdaten löschen</summary><p>Eine Löschung hebt Kontaktsperren nicht auf. Exportierte Dateien, Gmail und Anbieterprotokolle müssen separat bereinigt werden.</p>{error&&<p role="alert">{error}</p>}
+  <button className="secondary" disabled={busy} onClick={()=>action()}>Löschumfang prüfen</button>
+  {preview&&<><p>{preview.notice}</p><pre>{JSON.stringify(preview.counts,null,2)}</pre><p>{preview.localBackups.length} lokale Sicherungen des gesamten Profils werden ebenfalls entfernt. Portable Kopien bleiben außerhalb dieser App.</p>{preview.requiresCustomerDeletion&&scope==='contact'&&<><p>Dieser Kontakt hat verknüpfte Historie. Die gezielte Löschung einzelner historischer Texte wird hier nicht angeboten. Alternativ kannst du ausdrücklich den gesamten Kundenbestand löschen.</p><button className="secondary" onClick={()=>{setScope('customer');setPreview(undefined);}}>Stattdessen gesamten Kundenbestand zur Prüfung auswählen</button></>}
+   <button className="secondary" disabled={busy||preview.requiresCustomerDeletion&&scope==='contact'} onClick={()=>action(true)}>{scope==='customer'?'Gesamten Kundenbestand löschen …':'Kontakt und lokale Sicherungskopien löschen …'}</button></>}
+  {result&&<p>{result.remainingLocalBackups?.length?'Aktive Daten gelöscht; folgende lokale Sicherungen konnten nicht entfernt werden: '+result.remainingLocalBackups.join(', '):'Löschung durchgeführt. Minimale Sperrnachweise bleiben erhalten.'} Eine sichere physische Löschung auf SSDs wird nicht zugesichert.</p>}
+ </details>;
+}

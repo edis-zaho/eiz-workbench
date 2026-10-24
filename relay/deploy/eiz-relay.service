@@ -1,0 +1,37 @@
+[Unit]
+Description=EiZ tracking relay
+After=network.target
+# Do not start on an empty directory if the persistent disk is absent.
+RequiresMountsFor=/srv/eiz-relay
+ConditionPathIsMountPoint=/srv/eiz-relay
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=eiz-relay
+Group=eiz-relay
+UMask=0077
+Environment=EIZ_RELAY_CONFIG=/etc/eiz-relay/config.json
+Environment=EIZ_RELAY_DATABASE=/srv/eiz-relay/data/relay.sqlite
+Environment=EIZ_RELAY_HOST=127.0.0.1
+Environment=EIZ_RELAY_PORT=8080
+ExecStart=/opt/eiz-relay/node/bin/node /opt/eiz-relay/run.cjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+ReadWritePaths=/srv/eiz-relay/data
+
+[Install]
+WantedBy=multi-user.target

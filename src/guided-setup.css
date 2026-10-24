@@ -1,0 +1,30 @@
+[hidden]{display:none!important}
+.area-nav,.model-steps{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.area-nav button,.model-steps button{padding:11px 15px;border:1px solid #d6dfd6;background:white;color:#294d3d;border-radius:10px;font:inherit;cursor:pointer}
+.area-nav button[aria-current],.model-steps button[aria-current]{background:#294d3d;color:white;border-color:#294d3d}
+.setup-intro>p{max-width:760px;line-height:1.6}
+.setup-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0}
+.setup-step{display:grid;grid-template-columns:38px 1fr;gap:8px 12px;text-align:left;border:1px solid #d6dfd6;border-radius:12px;padding:20px;background:#f8faf5;cursor:pointer;font:inherit;color:#244b3b}
+.setup-step>span{grid-row:span 2;border-radius:50%;background:#e5edc7;width:32px;height:32px;display:grid;place-items:center}
+.setup-step>small{line-height:1.6;color:#57675d}
+.setup-step:hover{border-color:#688873;background:#f0f5e6}
+.client-sections [data-area]>.card{margin-bottom:24px}
+.advanced-panel{padding:20px;border:1px solid #d6dfd6;border-radius:12px;background:white;margin:18px 0}
+.advanced-panel>summary{cursor:pointer;font-weight:600;color:#294d3d;line-height:1.5}
+.advanced-panel[open]>summary{margin-bottom:18px}
+.model-settings .model-stage{max-width:960px}
+.model-settings .model-stage .setting{margin-bottom:20px}
+.model-settings .template-pick{padding:18px;background:#f0f5e6;border-radius:10px;display:grid;gap:12px;margin-bottom:20px}
+.model-settings .setup-help{line-height:1.6;color:#536357}
+.model-settings .model-progress{display:flex;flex-wrap:wrap;gap:8px 18px;margin:16px 0 22px;color:#526257}
+.model-settings .model-progress span{padding:5px 0}
+.model-settings details .editor{margin-top:14px}
+.model-settings .two-col{grid-template-columns:1fr}
+.mailbox-panel>.mail-advanced{margin:22px 0}
+.mailbox-panel .mail-advanced>.lead-block{margin-top:16px}
+.product-details{margin-bottom:22px}
+.client-sections .catalog-grid{grid-template-columns:1fr}
+.start-path{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.start-path div{padding:15px;border:1px solid #dce4d8;border-radius:10px}
+.start-path strong,.start-path small{display:block;line-height:1.6}
+@media(max-width:1100px){.setup-steps{grid-template-columns:1fr}.start-path{grid-template-columns:repeat(2,1fr)}}

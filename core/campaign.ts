@@ -1,0 +1,32 @@
+import type { Lead } from './leads';
+export type ProductReference={productId:string;revision:number};
+export type MessageStyle={name:string;style:string};
+export type CampaignContent={name:string;leadIds:string[];dailyLimit:number;startDate:string;startHour:number;endHour:number;weekdays:number[];timezone:string;steps:{subject:string;body:string;gapDays:number;variant?:MessageStyle}[];sequence?:MessageStyle;productRef?:ProductReference;knowledgeIds?:string[];hypothesisId?:string;experimentId?:string};
+export type CampaignRow={id:string;clientId:string;revision:number;content:string;approvedHash:string|null;approvedAt:string|null;createdAt:string;updatedAt:string};
+export type CampaignHistory={id:string;campaignId:string;clientId:string;revision:number;action:'saved'|'approved';content:string;fingerprint:string;createdAt:string};
+export const variables=['vorname','nachname','unternehmen','position'] as const;
+function messageStyle(value:unknown):MessageStyle{
+ const v=value as MessageStyle;
+ if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).length!==2||!Object.hasOwn(v,'name')||!Object.hasOwn(v,'style')||typeof v.name!=='string'||!v.name.trim()||v.name.length>100||/[\x00-\x1f\x7f]/.test(v.name)||typeof v.style!=='string'||v.style.length>1000||/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(v.style))throw new Error('Nachrichtenfassung benötigt einen Namen (max. 100 Zeichen) und einen Stil (max. 1.000 Zeichen).');
+ return {name:v.name.trim(),style:v.style.trim()};
+}
+export function validateCampaign(input:unknown):CampaignContent{
+ const d=input as CampaignContent;
+ if(!d||typeof d.name!=='string'||!d.name.trim()||d.name.length>160)throw new Error('Bitte einen Kampagnennamen angeben.');
+ if(!Array.isArray(d.leadIds)||d.leadIds.length>10000||d.leadIds.some(id=>typeof id!=='string'||!/^[a-f0-9-]{36}$/.test(id))||new Set(d.leadIds).size!==d.leadIds.length)throw new Error('Ungültige Kontaktauswahl.');
+ if(!Number.isInteger(d.dailyLimit)||d.dailyLimit<1||d.dailyLimit>1000)throw new Error('Tageslimit muss zwischen 1 und 1.000 liegen.');
+ if(typeof d.startDate!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(d.startDate)||!Number.isFinite(Date.parse(d.startDate))||new Date(d.startDate).toISOString().slice(0,10)!==d.startDate)throw new Error('Ungültiges Startdatum.');
+ if(!Number.isInteger(d.startHour)||!Number.isInteger(d.endHour)||d.startHour<0||d.endHour>24||d.startHour>=d.endHour)throw new Error('Bitte ein gültiges Versandfenster am selben Tag wählen.');
+ if(!Array.isArray(d.weekdays)||!d.weekdays.length||d.weekdays.some(n=>!Number.isInteger(n)||n<0||n>6)||new Set(d.weekdays).size!==d.weekdays.length)throw new Error('Bitte gültige Versandtage wählen.');
+ if(typeof d.timezone!=='string'||d.timezone.length>80)throw new Error('Zeitzone fehlt.');try{new Intl.DateTimeFormat('de-DE',{timeZone:d.timezone});}catch{throw new Error('Ungültige Zeitzone.');}
+ if(!Array.isArray(d.steps)||d.steps.length<1||d.steps.length>5)throw new Error('Eine bis fünf Nachrichten sind möglich.');
+ for(const [i,s] of d.steps.entries()){if(!s||typeof s.subject!=='string'||!s.subject.trim()||s.subject.length>120||/[\r\n\0]/.test(s.subject)||typeof s.body!=='string'||!s.body.trim()||s.body.length>4000||s.body.includes('\0'))throw new Error('Betreff oder Nachricht fehlt bzw. ist zu lang.');if(!Number.isInteger(s.gapDays)||(i===0?s.gapDays!==0:s.gapDays<1||s.gapDays>90))throw new Error('Abstände müssen 1–90 Kalendertage betragen; die Erstmail startet bei 0.');for(const t of [s.subject,s.body]){for(const token of t.matchAll(/\{\{([^{}]*)\}\}/g))if(!variables.includes(token[1] as any))throw new Error(`Unbekannter Platzhalter: ${token[0]}`);if(/[{}]/.test(t.replace(/\{\{[^{}]*\}\}/g,'')))throw new Error('Unvollständiger Platzhalter.');}}
+ if(d.productRef!==undefined){const p=d.productRef;if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length!==2||!Object.hasOwn(p,'productId')||!Object.hasOwn(p,'revision')||typeof p.productId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(p.productId)||!Number.isSafeInteger(p.revision)||p.revision<1)throw new Error('Ungültige Produktversion.');}
+ if(d.knowledgeIds!==undefined&&(!d.productRef||!Array.isArray(d.knowledgeIds)||d.knowledgeIds.length<1||d.knowledgeIds.length>20||d.knowledgeIds.some(id=>typeof id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id))||new Set(d.knowledgeIds).size!==d.knowledgeIds.length))throw new Error('Eine bis 20 eindeutige freigegebene Aussagen mit Produktbindung auswählen.');
+ if(d.hypothesisId!==undefined&&(!d.productRef||!d.knowledgeIds||typeof d.hypothesisId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(d.hypothesisId)))throw new Error('Eine freigegebene Hypothese mit Produkt- und Faktenbindung auswählen.');
+ if(d.experimentId!==undefined&&(!d.hypothesisId||typeof d.experimentId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(d.experimentId)))throw new Error('Experiment benötigt eine feste Kennung und Hypothesenbindung.');
+ if(d.sequence!==undefined){messageStyle(d.sequence);if(!d.hypothesisId)throw new Error('Benannte Nachrichtenfassungen benötigen eine freigegebene Hypothesenbindung.');for(const s of d.steps)messageStyle(s.variant);}
+ else if(d.steps.some(s=>s.variant!==undefined))throw new Error('Nachrichtenvarianten benötigen eine benannte Nachrichtenfolge.');
+ return {name:d.name.trim(),leadIds:[...d.leadIds],dailyLimit:d.dailyLimit,startDate:d.startDate,startHour:d.startHour,endHour:d.endHour,weekdays:[...d.weekdays],timezone:d.timezone,steps:d.steps.map(s=>({subject:s.subject.trim(),body:s.body.trim(),gapDays:s.gapDays,...(d.sequence?{variant:messageStyle(s.variant)}:{})})),...(d.productRef?{productRef:{productId:d.productRef.productId,revision:d.productRef.revision}}:{}),...(d.knowledgeIds?{knowledgeIds:[...d.knowledgeIds].sort()}:{}),...(d.hypothesisId?{hypothesisId:d.hypothesisId}:{}),...(d.experimentId?{experimentId:d.experimentId}:{}),...(d.sequence?{sequence:messageStyle(d.sequence)}:{})};
+}
+export function personalize(template:string,lead:Lead){const values={vorname:lead.firstName,nachname:lead.lastName,unternehmen:lead.company,position:lead.role};return template.replace(/\{\{([^{}]*)\}\}/g,(_,key:keyof typeof values)=>{if(!values[key]?.trim())throw new Error(`Für ${lead.email} fehlt ${key}.`);return values[key];});}

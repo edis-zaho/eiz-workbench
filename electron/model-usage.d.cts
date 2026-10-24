@@ -1,0 +1,1 @@
+export function normalizeModelUsage(protocol:string,raw:unknown): {inputTokens:number|null;outputTokens:number|null;cachedInputTokens:number|null;reasoningTokens:number|null;raw:Record<string,unknown>};

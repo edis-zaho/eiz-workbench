@@ -1,0 +1,34 @@
+[Unit]
+Description=EiZ consistent relay backup to private bucket
+After=eiz-relay.service network-online.target
+Wants=network-online.target
+RequiresMountsFor=/srv/eiz-relay
+ConditionPathIsMountPoint=/srv/eiz-relay
+
+[Service]
+Type=oneshot
+User=eiz-relay
+Group=eiz-relay
+UMask=0077
+Environment=EIZ_RELAY_DATABASE=/srv/eiz-relay/data/relay.sqlite
+Environment=EIZ_RELAY_BACKUP_DIR=/srv/eiz-relay/backups
+Environment=CLOUDSDK_CONFIG=/srv/eiz-relay/gcloud
+Environment=CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
+# Contains only EIZ_RELAY_BACKUP_BUCKET, NOT application access keys.
+EnvironmentFile=/etc/eiz-relay/backup.env
+ExecStart=/opt/eiz-relay/node/bin/node /opt/eiz-relay/backup.mjs
+TimeoutStartSec=600
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+# SQLite may need shared-memory locking beside its read-only main DB.
+ReadWritePaths=/srv/eiz-relay/data /srv/eiz-relay/backups /srv/eiz-relay/gcloud
+InaccessiblePaths=/etc/eiz-relay/config.json

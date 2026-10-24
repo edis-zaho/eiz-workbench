@@ -1,0 +1,41 @@
+const assert=require('node:assert/strict');
+const {writeFileSync,readFileSync}=require('node:fs');
+const {join}=require('node:path');
+exports.checkStrategy=async(win,dataDir,js,until,click,url,headers,clientId,productId)=>{
+ const base=`/api/clients/${clientId}/products/${productId}`;
+ const fill=async values=>js(`(()=>{for(const [label,value] of ${JSON.stringify(Object.entries(values))}){const el=document.querySelector('[aria-label="'+label+'"]');const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(proto,'value').set.call(el,value);el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));}})()`);
+ const knowledge=await(await fetch(url+base+'/knowledge',{headers})).json(),source=knowledge.items.find(r=>r.kind==='source'&&r.usable);
+ const meta={entityId:null,expectedRevision:0,productRevision:knowledge.productRevision,kind:'claim',action:'save',content:{category:'feature',text:'Synthetic strategy fact',sourceId:source.id,quote:source.content.text.slice(0,25)},actor:'Smoke',reason:'Synthetic test only'};
+ const post=async body=>{const r=await fetch(url+base+'/knowledge',{method:'POST',headers,body:JSON.stringify(body)});assert.equal(r.status,200);return r.json();};
+ const d=await post(meta),fact=await post({...meta,entityId:d.entityId,expectedRevision:1,action:'approve'});
+ await fill({'Produkt auswählen':productId});await until(`document.querySelector('[aria-label="Strategie Betreiber"]')&&!document.querySelector('.strategy-panel fieldset').disabled`);
+ await fill({'Strategie Betreiber':'Smoke reviewer','Strategie Begründung':'Synthetic approval test','Persona Code':'IT_LEADERSHIP','Persona Name':'IT-Leitung','Persona Verantwortung':'Verantwortet Systeme und Schnittstellen.','Persona Jobtitel':'Head of IT\nIT Director'});
+ await js(`window.__strategyFetch=window.fetch;window.__strategyPosts=0;window.fetch=(...args)=>{if(String(args[0]).endsWith('/strategy')&&args[1]?.method==='POST')window.__strategyPosts++;return window.__strategyFetch(...args);};void 0;`);
+ try{
+  await js(`document.querySelector('.strategy-panel form').requestSubmit();document.querySelector('.strategy-panel form').requestSubmit();`);
+  await until(`document.querySelector('.strategy-panel [role="status"]')?.innerText.includes('Entwurf gespeichert')`);assert.equal(await js('window.__strategyPosts'),1);
+  let state=await(await fetch(url+base+'/strategy',{headers})).json();assert.equal(state.rows.length,1);assert.equal(state.items[0].usable,false);
+  await click('Persona freigeben');await until(`document.querySelector('.strategy-panel')?.innerText.includes('1 verwendbare Personas')`);
+  state=await(await fetch(url+base+'/strategy',{headers})).json();const persona=state.items.find(r=>r.kind==='persona');
+  await fill({'Hypothese Name':'IT CSV Test','Hypothese Persona':persona.id,'Hypothese segment':'Fertigungsunternehmen','Hypothese pain':'Manuelle Übergaben','Hypothese angle':'Nachvollziehbare CSV-Übergabe','Hypothese benefit':'Relevanz von Nachvollziehbarkeit testen','Hypothese cta':'Kurzen Prozessvergleich anbieten','Hypothese style':'Direkt, ohne unbelegte ROI-Zahl'});
+  await js(`document.querySelector('[aria-label="Hypothesenfakt ${fact.id}"]').click()`);
+  await click('Hypothese als Entwurf speichern');await until(`document.querySelector('[aria-label="Strategie Hypothese bearbeiten"]').options.length===2`);
+  await click('Hypothese freigeben');await until(`document.querySelector('.strategy-panel').innerText.includes('1 verwendbare Hypothesen')`);
+  await fill({'Persona Titelprobe':' head OF IT '});await until(`document.querySelector('.persona-title-result')?.innerText.includes('IT_LEADERSHIP')`);
+  win.show();await js(`document.querySelector('.strategy-panel').scrollIntoView({behavior:'instant',block:'start'})`);await new Promise(r=>setTimeout(r,700));
+  const shot=await win.webContents.capturePage();if(!shot.isEmpty())writeFileSync(join(dataDir,'strategy.png'),shot.toPNG());
+  await js(`document.querySelector('[aria-label="Hypothese angle"]').scrollIntoView({behavior:'instant',block:'center'})`);await new Promise(r=>setTimeout(r,700));
+  const detail=await win.webContents.capturePage();if(!detail.isEmpty())writeFileSync(join(dataDir,'strategy-detail.png'),detail.toPNG());
+  await click('Persona widerrufen');await until(`document.querySelector('.strategy-panel').innerText.includes('0 verwendbare Hypothesen')`);
+  await until(`document.querySelector('.persona-title-result')?.innerText.includes('Keine passende')`);
+  state=await(await fetch(url+base+'/strategy',{headers})).json();assert.match(state.items.find(r=>r.kind==='hypothesis').inactiveReason,/Personaversion/);
+  await click('Hypothese widerrufen');await until(`document.querySelector('.strategy-panel').innerText.includes('Strategiehistorie (6 Versionen)')`);
+  const target=join(dataDir,'strategy-export.json');
+  const download=new Promise((resolve,reject)=>{const timer=setTimeout(()=>{win.webContents.session.removeListener('will-download',handler);reject(new Error('Strategy export timed out'));},15000);function handler(_event,item){item.setSavePath(target);item.once('done',(_event,status)=>{clearTimeout(timer);status==='completed'?resolve():reject(new Error(status));});}win.webContents.session.once('will-download',handler);});
+  await Promise.all([click('Produktstrategie als JSON herunterladen'),download]);const exported=JSON.parse(readFileSync(target,'utf8'));assert.equal(exported.productId,productId);assert.equal(exported.rows.length,6);assert.ok(exported.rows.every(r=>r.clientId===clientId));
+  await js(`window.fetch=(...args)=>String(args[0]).endsWith('/strategy')?new Promise(resolve=>{window.__releaseStrategy=()=>resolve(new Response('{}'));}):window.__strategyFetch(...args);void 0;`);
+  await click('Strategiekatalog neu laden');await until(`typeof window.__releaseStrategy==='function'`);await fill({'Produkt auswählen':''});await until(`!document.querySelector('.strategy-panel')`);await js(`window.__releaseStrategy();void 0;`);
+  assert.ok(!(await js('document.body.innerText')).includes('Strategiekatalog konnte nicht geladen'));
+  writeFileSync(join(dataDir,'strategy-result.json'),JSON.stringify({passed:true,personaAndHypothesisApproved:true,withdrawalInvalidatesDependency:true,titlePreview:true,doubleSubmitRequests:1,downloadedHistoryRows:6,lateProductResponseIgnored:true,liveProvider:false},null,2));
+ }finally{await js(`window.fetch=window.__strategyFetch;delete window.__releaseStrategy;void 0;`);}
+};

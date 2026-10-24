@@ -1,0 +1,17 @@
+{
+    # Keep lifecycle/TLS diagnostics, omit HTTP request/error records that can
+    # contain URL tokens. Never enable debug, access logs or log_credentials.
+    log default {
+        exclude http.log.access http.log.error
+    }
+    servers {
+        protocols h1 h2
+    }
+}
+
+# Replace only after DNS/hosting approval. No wildcard, no public admin API.
+tracking.example.com {
+    header Referrer-Policy "no-referrer"
+    header X-Content-Type-Options "nosniff"
+    reverse_proxy 127.0.0.1:8080
+}

@@ -1,0 +1,23 @@
+export const companySignalFields=[
+ ['contactedCompanies','Unternehmen mit bestätigtem Kampagnenkontakt'],
+ ['matureCompanies','Unternehmen mit vollständig verstrichenem Zeitfenster'],
+ ['pendingCompanies','Unternehmen noch im Beobachtungsfenster'],
+ ['invalidTimeCompanies','Unternehmen mit ungeklärter Versandzeit'],
+ ['messagesInWindow','Kampagnenmails innerhalb gereifter Unternehmensfenster'],
+ ['registeredMessages','Davon mit passendem Registrierungsbeleg'],
+ ['withoutRegistration','Davon ohne gespeicherten Registrierungsnachweis'],
+ ['registeredWithoutSignal','Registriert, aber kein aktives Signal im Unternehmensfenster'],
+ ['expiresBeforeWindowEnd','Registrierung endet vor Ende des Unternehmensfensters'],
+ ['clickEnabledMessages','Davon mit registriertem Klicklink'],
+ ['observedMessages','Nachrichten mit aktivem Signal'],
+ ['observedCompanies','Unternehmen mit aktivem Signal'],
+ ['openCompanies','Unternehmen mit technischem Pixelabruf'],
+ ['clickCompanies','Unternehmen mit technischem Klickabruf'],
+ ['opens','Technische Pixelabrufe'],['clicks','Technische Klickabrufe'],
+ ['flaggedSignals','Davon mit Proxy-/Automatikmerkmal'],
+ ['unflaggedSignals','Davon ohne Automatikmerkmal (Menschlichkeit unbekannt)'],
+ ['relaySignals','Davon automatisch abgeholt'],['importedSignals','Davon aus Dateiimport'],
+ ['repeatedOpenCompanies','Unternehmen mit mindestens drei Abrufzeiten derselben Nachricht/Quelle ohne Automatikmerkmal'],
+ ['withdrawnSignals','Widerrufene Signale (nicht mitgezählt)'],
+ ['excludedSignals','Weitere nicht mitgezählte Signale']
+] as const;

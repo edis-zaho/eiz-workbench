@@ -1,0 +1,10 @@
+.pilot-start { padding: 24px; }
+.pilot-campaign-select { display: grid; gap: 8px; margin: 16px 0; }
+.pilot-progress { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 18px 0; }
+.pilot-progress > div { border: 1px solid #dce3e9; border-radius: 10px; padding: 16px; }
+.pilot-progress > div > div { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.pilot-progress [data-state="attention"] { border-color: #c18b32; }
+.pilot-progress [data-state="unknown"] { background: #f6f7f9; }
+.pilot-guide { margin-top: 20px; }
+.pilot-guide > summary { cursor: pointer; font-weight: 600; }
+@media(max-width: 900px) { .pilot-progress { grid-template-columns: 1fr; } }

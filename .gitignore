@@ -1,0 +1,27 @@
+node_modules/
+dist/
+backend/
+release/
+qa/
+*.sqlite*
+.env
+
+release-*/
+snapshots/
+
+# Local development and credentials must never enter a model handoff or Git.
+.tooling/
+.local/
+output/
+tmp/
+.env.*
+!.env.example
+*.log
+*credentials*.json
+*client_secret*.json
+
+# Generated dependency notices and local application artifacts
+*.eizbackup
+*.enc
+*.pem
+*.key

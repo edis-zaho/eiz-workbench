@@ -1,0 +1,8 @@
+import React,{useState} from 'react';
+type Report={backupBytes:number;freeBytes:number|null;importLimitBytes:number;withinImportLimit:boolean;warnings:string[];checkedAt:string};
+const size=(n:number)=>new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(n/1024/1024)+' MB';
+export function StorageCheck({api}:{api:(path:string,body?:unknown,method?:string)=>Promise<any>}){
+ const [report,setReport]=useState<Report>();const [busy,setBusy]=useState(false);const [error,setError]=useState('');
+ async function check(){setBusy(true);setError('');setReport(undefined);try{setReport(await api('/api/storage-check',undefined,'GET'));}catch(e){setError(e instanceof Error?e.message:'Speicherprüfung fehlgeschlagen.');}finally{setBusy(false);}}
+ return <><div className="divider"/><h2>Speicher & Sicherungsgröße</h2><p>Prüfe die aktuelle Sicherungsgröße und den freien Platz auf deinem Datenlaufwerk.</p><button className="secondary" disabled={busy} onClick={check}>{busy?'Wird geprüft …':'Speicher prüfen'}</button>{error&&<div className="alert error" role="alert">{error}</div>}{report&&<div aria-live="polite"><dl><dt>Aktuelle Sicherung</dt><dd>{size(report.backupBytes)}</dd><dt>Derzeitige Importgrenze</dt><dd>{size(report.importLimitBytes)}</dd><dt>Freier Speicher</dt><dd>{report.freeBytes===null?'Unbekannt':size(report.freeBytes)}</dd></dl>{report.warnings.map(w=><div key={w} className="alert error">{w}</div>)}{!report.warnings.length&&<p>Größe und freier Speicher sind unauffällig.</p>}<div className="footnote">Momentaufnahme. Speicherplatz ersetzt keine Wiederherstellungsprobe. Exporte enthalten keine Zugangsdaten; nach Wiederherstellung können neue Anmeldungen nötig sein.</div></div>}</>;
+}

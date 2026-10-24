@@ -1,0 +1,2 @@
+export type DialogueAutoRules={enabled:boolean;timezone:string;weekdays:number[];startHour:number;endHour:number;dailyLimit:number;accountDailyLimit:number;accountGapMinutes:number;minDelayMinutes:number};
+export const defaultDialogueAutoRules=():DialogueAutoRules=>({enabled:false,timezone:'Europe/Berlin',weekdays:[1,2,3,4,5],startHour:9,endHour:17,dailyLimit:10,accountDailyLimit:2,accountGapMinutes:60,minDelayMinutes:5});

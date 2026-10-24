@@ -1,0 +1,8 @@
+.evidence-export .card-head { display:block; }
+.evidence-export .card-head p { margin-top:12px; }
+.evidence-export .editor { padding:0 24px 24px; }
+.evidence-export .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px; }
+.evidence-export label { display:block; margin-bottom:8px; font-size:12px; }
+.evidence-export input, .evidence-export select { width:100%; box-sizing:border-box; padding:10px; border:1px solid #dbe2d3; border-radius:7px; font:inherit; background:#fcfdfb; color:#34492e; }
+.evidence-export > .alert { display:block; margin:0 24px 24px; }
+.evidence-export .alert .info { display:block; }

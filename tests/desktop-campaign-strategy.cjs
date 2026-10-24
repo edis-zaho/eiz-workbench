@@ -1,0 +1,43 @@
+const assert=require('node:assert/strict');
+const {writeFileSync}=require('node:fs');
+const {join}=require('node:path');
+exports.checkCampaignStrategy=async(win,dataDir,js,until,click,url,headers,clientId,productId,factId)=>{
+  const path=`/api/clients/${clientId}/products/${productId}/strategy`;
+  const request=async body=>{const r=await fetch(url+path,{headers,method:'POST',body:JSON.stringify(body)});assert.equal(r.status,200);return r.json();};
+  const state=await(await fetch(url+path,{headers})).json();
+  const base={entityId:null,expectedRevision:0,productRevision:state.productRevision,action:'save',actor:'Smoke',reason:'Synthetischer Kampagnentest'};
+  const persona={code:'CAMPAIGN_IT',name:'IT-Leitung im Versandpilot',responsibility:'Systeme und Schnittstellen',titles:['Head of IT']};
+  const pd=await request({...base,kind:'persona',content:persona});
+  const pa=await request({...base,kind:'persona',content:persona,entityId:pd.entityId,expectedRevision:1,action:'approve'});
+  const content={name:'Prozessvergleich für die IT-Leitung',personaId:pa.id,segment:'Mittelständische Unternehmen',pain:'Manuelle Datenübergaben',angle:'Schnittstellen statt Handarbeit',benefit:'Prüfen, ob weniger manuelle Übertragungen relevant sind',cta:'Bestehenden Ablauf gemeinsam vergleichen',style:'Direkt, sachlich, ohne unbelegte ROI-Versprechen',knowledgeIds:[factId]};
+  const hd=await request({...base,kind:'hypothesis',content});
+  const ha=await request({...base,kind:'hypothesis',content,entityId:hd.entityId,expectedRevision:1,action:'approve'});
+  const choose=async(label,value)=>js(`(()=>{const el=document.querySelector('[aria-label="'+${JSON.stringify(label)}+'"]');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(el,${JSON.stringify(value)});el.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+  const selection='[aria-label="Kampagnenhypothese"]',fact=`[aria-label="Kampagnenaussage ${factId}"]`;
+  const before=await js(`document.querySelector('[aria-label="Kampagne Nachricht 1"]').value`);
+  await until(`document.querySelector(${JSON.stringify(fact)})?.checked`);await js(`document.querySelector(${JSON.stringify(fact)}).click()`);
+  await click('Kampagnenhypothesen aktualisieren');await until(`Array.from(document.querySelector('${selection}').options).some(o=>o.value==='${ha.id}')`);
+  assert.equal(await js(`Array.from(document.querySelector('${selection}').options).some(o=>o.value==='${hd.id}')`),false);
+  await choose('Kampagnenhypothese',ha.id);await until(`document.querySelector('${selection}').value==='${ha.id}'&&document.querySelector(${JSON.stringify(fact)}).checked`);
+  assert.equal(await js(`document.querySelector('[aria-label="Kampagne Nachricht 1"]').value`),before);
+  assert.equal(await js(`document.querySelectorAll('.campaign-panel input[aria-label^="Kontakt "]:checked').length`),1);
+  await choose('Kampagnenhypothese','');assert.equal(await js(`document.querySelector(${JSON.stringify(fact)}).checked`),true,'removing hypothesis retains selected facts');
+  await choose('Kampagnenhypothese',ha.id);
+  await js(`document.querySelector(${JSON.stringify(fact)}).click()`);await until(`document.querySelector('.campaign-strategy').innerText.includes('Erforderliche Produktfakten fehlen')`);
+  await js(`document.querySelector(${JSON.stringify(fact)}).click()`);
+  const loaded=await(await fetch(url+path,{headers})).json();
+  await js(`window.__campaignStrategyFetch=window.fetch;window.fetch=(...args)=>String(args[0]).endsWith(${JSON.stringify(path)})?new Promise(resolve=>{window.__releaseCampaignStrategy=()=>resolve(new Response(${JSON.stringify(JSON.stringify(loaded))}));}):window.__campaignStrategyFetch(...args);void 0;`);
+  try{
+    await click('Kampagnenhypothesen aktualisieren');await until(`typeof window.__releaseCampaignStrategy==='function'`);
+    await choose('Kampagnenprodukt','');await until(`!document.querySelector('.campaign-strategy')`);
+    await js(`window.__releaseCampaignStrategy();void 0;`);assert.equal(await js(`!!document.querySelector('.campaign-strategy')`),false);
+  }finally{await js(`window.fetch=window.__campaignStrategyFetch;delete window.__releaseCampaignStrategy;void 0;`);}
+  await choose('Kampagnenprodukt',productId+':'+state.productRevision);
+  await until(`document.querySelector('${selection}')&&!document.querySelector('${selection}').disabled`);
+  assert.equal(await js(`document.querySelector('${selection}').value`),'','product switch clears hypothesis');
+  await choose('Kampagnenhypothese',ha.id);await until(`document.querySelector(${JSON.stringify(fact)})?.checked`);
+  win.show();await js(`document.querySelector('.campaign-strategy').scrollIntoView({behavior:'instant',block:'start'})`);await new Promise(r=>setTimeout(r,700));
+  const shot=await win.webContents.capturePage();if(!shot.isEmpty())writeFileSync(join(dataDir,'campaign-strategy.png'),shot.toPNG());
+  writeFileSync(join(dataDir,'campaign-strategy-result.json'),JSON.stringify({passed:true,draftNotSelectable:true,requiredFactsAdded:true,missingFactExplained:true,textAndContactsUnchanged:true,removalRetainsFacts:true,productSwitchClearsBinding:true,lateResponseIgnored:true,liveProvider:false},null,2));
+  return ha.id;
+};
