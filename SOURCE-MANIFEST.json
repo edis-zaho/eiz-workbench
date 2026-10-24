@@ -13,6 +13,7 @@
     "tests/public-package.test.ts"
   ],
   "files": {
+    ".gitattributes": "5f4508252fb46b02e7646875e7a4aef89024175c7f8e13df692d5e50955be3c2",
     ".github/ISSUE_TEMPLATE/bug_report.md": "0a6b5bc7f56c63b6f493ec79689e97b5da6e448fd115dd7c39a1c8e8f373876a",
     ".gitignore": "61e1f92a3a68233e39053c11440237fa3ad9aaad9a80f639922df202be83ec1d",
     "AGENTS.md": "c6f08bd7869eda1318d02e242762731c70f8ff7b090e18ba0c3c54dbd067f544",
